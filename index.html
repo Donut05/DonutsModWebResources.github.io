@@ -1,9 +1,194 @@
-<!doctype HTML>
+<!doctype html>
 <html lang="en">
-  <head>
-    <title>Well, well, well!</title>
-  </head>
-  <body>
-    <p>Wisely done, Mister Freeman! But you are not supposed to be here!</p> 
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wisely done, Mister Freeman! But you are not supposed to be here!</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, 'Helvetica Neue', Arial;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url('website/gifs/donut.gif');
+      background-repeat: repeat;
+      background-position: center top;
+      background-color: #000;
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+    }
+
+    .site {
+      width: 100%;
+      max-width: 1400px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .main-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      width: 100%;
+    }
+
+    .left-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .center-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 12px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .right-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .bottom-wrapper {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 18px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 8px 12px;
+    }
+
+    .page-obj {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .big-lambda {
+      width: 220px;
+      max-height: 70vh;
+      object-fit: contain;
+    }
+
+    .audio-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    audio {
+      width: 60%;
+      outline: none;
+    }
+
+    @media (max-width: 900px) {
+      .main-wrapper {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .left-wrapper,
+      .center-wrapper,
+      .right-wrapper {
+        max-width: 100%;
+        align-items: center;
+      }
+
+      .big-lambda {
+        width: 40vw;
+      }
+
+      .bottom-wrapper {
+        width: auto;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="site">
+    <div class="main-wrapper">
+      <div class="left-wrapper">
+        <img src="website/gifs/globe.gif" alt="Globe GIF" class="page-obj" />
+        <img src="website/gifs/computer.gif" alt="Computer GIF" class="page-obj" />
+      </div>
+
+      <div class="center-wrapper">
+        <img src="website/images/you_just_got_text.png" alt="Text Image" class="page-obj" />
+        <img src="website/gifs/donuted_text.gif" alt="Text GIF" class="page-obj" />
+        <div class="audio-container">
+          <audio id="audio" src="website/audio/rick_roll.mp3" autoplay loop controls preload="auto"></audio>
+        </div>
+      </div>
+
+      <div class="right-wrapper">
+        <img src="website/gifs/lambda.gif" alt="Lambda GIF" class="big-lambda" />
+      </div>
+    </div>
+
+    <div class="bottom-wrapper">
+      <img src="website/gifs/old_computer.gif" alt="AD GIF" class="page-obj" />
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const audio = document.getElementById('audio');
+
+      async function tryPlay() {
+        try {
+          await audio.play();
+        } catch (err) {
+          console.warn('Autoplay blocked or failed:', err);
+        }
+      }
+
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        tryPlay();
+      } else {
+        document.addEventListener('DOMContentLoaded', tryPlay);
+      }
+    })();
+  </script>
+</body>
+
 </html>
