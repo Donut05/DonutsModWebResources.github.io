@@ -148,8 +148,10 @@
   <div class="site">
     <div class="main-wrapper">
       <div class="left-wrapper">
-        <img src="website/gifs/globe.gif" alt="Globe GIF" class="page-obj" />
-        <img src="website/gifs/computer.gif" alt="Computer GIF" class="page-obj" />
+        <a href="spin.html" target="blank">
+          <img class="alignnone size-full wp-image-1303" src="website/gifs/globe.gif" alt="Globe GIF" />
+        </a>
+        <img src="website/gifs/computer.gif" alt="Computer GIF" onclick="playSound()" />
       </div>
 
       <div class="center-wrapper">
@@ -161,17 +163,28 @@
       </div>
 
       <div class="right-wrapper">
-        <img src="website/gifs/lambda.gif" alt="Lambda GIF" class="big-lambda" />
+        <a href="hl3.html" target="blank">
+          <img src="website/gifs/lambda.gif" alt="Lambda GIF" class="big-lambda" />
+        </a>
       </div>
     </div>
 
+    <div>
+      <audio id="videogameSound" src="website/audio/videogame.wav" preload="auto" hidden="true"></audio>
+    </div>
     <div class="bottom-wrapper">
-      <img src="website/gifs/old_computer.gif" alt="AD GIF" class="page-obj" />
+      <a href="https://www.amazon.com/s?k=gaming+pc&crid=1D3T2TVB6GAPZ&sprefix=gaming+pc%2Caps%2C217&ref=nb_sb_noss_1" target="blank">
+        <img src="website/gifs/old_computer.gif" alt="AD GIF" class="page-obj" />
+      </a>
     </div>
   </div>
 
   <script>
+    function playSound() {
+      document.getElementById("videogameSound").play();
+    }
     (function () {
+
       const audio = document.getElementById('audio');
 
       async function tryPlay() {

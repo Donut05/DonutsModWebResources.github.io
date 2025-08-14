@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SPEEEEEEEEEEEEEEEEEEEEEEEEN</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background: #9b7838;
+            background-image: url('website/images/tf2_logo.png');
+            overflow: hidden;
+            font-family: system-ui, Segoe UI, Roboto
+        }
+
+        #canvas {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .dvd {
+            position: absolute;
+            width: 140px;
+            height: auto;
+            user-select: none;
+            pointer-events: auto;
+            transform: translate3d(0, 0, 0);
+            will-change: transform, filter;
+            transition: filter 250ms linear;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="audio" aria-hidden="true">
+        <div>
+            <audio id="audio" src="website/audio/trank.ogg" autoplay loop controls preload="auto"></audio>
+        </div>
+        <div>
+            <audio id="deathSound" src="website/audio/lego-yoda-death-sound.mp3" preload="auto" hidden="true"></audio>
+        </div>
+    </div>
+    <div id="canvas" aria-hidden="true"></div>
+
+    <script>
+        (function () {
+            //BOUNCING GIFS
+            const COUNT = 9;
+            const canvas = document.getElementById('canvas');
+            const toggleBtn = document.getElementById('toggle');
+            const shuffleBtn = document.getElementById('shuffle');
+            const countSpan = document.getElementById('count');
+
+            const gifSrcs = [
+                'website/gifs/tf2_mercs_spin/demoman.gif',
+                'website/gifs/tf2_mercs_spin/heavy.gif',
+                'website/gifs/tf2_mercs_spin/medic.gif',
+                'website/gifs/tf2_mercs_spin/pyro.gif',
+                'website/gifs/tf2_mercs_spin/scout.gif',
+                'website/gifs/tf2_mercs_spin/sniper.gif',
+                'website/gifs/tf2_mercs_spin/soldier.gif',
+                'website/gifs/tf2_mercs_spin/spin.gif',
+                'website/gifs/tf2_mercs_spin/spy.gif'
+            ];
+
+            const items = [];
+            let running = true;
+            let lastT = performance.now();
+
+            function rand(min, max) { return Math.random() * (max - min) + min }
+
+            function createGif(src, i) {
+                const img = document.createElement('img');
+                img.draggable = false;
+                img.className = 'dvd';
+                img.src = src;
+                img.alt = 'bouncing gif #' + (i + 1);
+
+                img.addEventListener('click', () => {
+                    const sound = document.getElementById('deathSound');
+                    sound.currentTime = 0.25;
+                    sound.play();
+                    canvas.removeChild(img);
+                    const idx = items.findIndex(it => it.el === img);
+                    if (idx >= 0) items.splice(idx, 1);
+                    countSpan.textContent = items.length;
+                });
+
+                canvas.appendChild(img);
+                return img;
+            }
+
+            function placeInitial(el) {
+                const rect = el.getBoundingClientRect();
+                const w = rect.width || 140;
+                const h = rect.height || 90;
+                const cw = window.innerWidth;
+                const ch = window.innerHeight;
+
+                const x = rand(0, Math.max(0, cw - w));
+                const y = rand(0, Math.max(0, ch - h));
+
+                const speed = rand(140, 360);
+                const angle = rand(0, Math.PI * 2);
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+
+                return { el, x, y, w, h, vx, vy };
+            }
+
+            function init() {
+                for (let i = 0; i < COUNT; i++) {
+                    const src = gifSrcs[i % gifSrcs.length];
+                    const el = createGif(src, i);
+                    el.onload = () => {
+                        const obj = placeInitial(el);
+                        const rect = el.getBoundingClientRect();
+                        obj.w = rect.width; obj.h = rect.height;
+                        items.push(obj);
+                        countSpan.textContent = items.length;
+                    };
+                    setTimeout(() => {
+                        if (!items.find(it => it.el === el)) {
+                            const obj = placeInitial(el);
+                            items.push(obj);
+                            countSpan.textContent = items.length;
+                        }
+                    }, 400);
+                }
+
+                requestAnimationFrame(loop);
+
+                window.addEventListener('resize', () => {
+                    const W = window.innerWidth, H = window.innerHeight;
+                    for (const it of items) {
+                        it.w = it.el.getBoundingClientRect().width;
+                        it.h = it.el.getBoundingClientRect().height;
+                        it.x = Math.min(it.x, Math.max(0, W - it.w));
+                        it.y = Math.min(it.y, Math.max(0, H - it.h));
+                        applyTransform(it);
+                    }
+                });
+            }
+
+            function applyTransform(it) {
+                it.el.style.transform = `translate3d(${it.x}px, ${it.y}px, 0)`;
+            }
+
+            function loop(now) {
+                if (!running) return;
+                const dt = Math.min(0.05, (now - lastT) / 1000);
+                lastT = now;
+                const W = window.innerWidth, H = window.innerHeight;
+
+                for (const it of items) {
+                    it.x += it.vx * dt;
+                    it.y += it.vy * dt;
+
+                    let hitX = false, hitY = false;
+
+                    if (it.x <= 0) { it.x = 0; it.vx = Math.abs(it.vx); hitX = true }
+                    if (it.x + it.w >= W) { it.x = W - it.w; it.vx = -Math.abs(it.vx); hitX = true }
+                    if (it.y <= 0) { it.y = 0; it.vy = Math.abs(it.vy); hitY = true }
+                    if (it.y + it.h >= H) { it.y = H - it.h; it.vy = -Math.abs(it.vy); hitY = true }
+
+                    if (hitX && hitY) {
+                        it.vx *= rand(0.9, 1.15);
+                        it.vy *= rand(0.9, 1.15);
+                    }
+
+                    applyTransform(it);
+                }
+
+                requestAnimationFrame(loop);
+            }
+
+            init();
+
+            //AUDIO
+            const audio = document.getElementById('audio');
+
+            async function tryPlay() {
+                try {
+                    await audio.play();
+                } catch (err) {
+                    console.warn('Autoplay blocked or failed:', err);
+                }
+            }
+
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                tryPlay();
+            } else {
+                document.addEventListener('DOMContentLoaded', tryPlay);
+            }
+        })();
+    </script>
+</body>
+
+</html>
