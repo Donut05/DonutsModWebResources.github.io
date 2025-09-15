@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Steam Workshop Description Previewer 9000</title>
+  <style>
+    :root{--bg:#0b0f14;--panel:#0f1620;--muted:#9aa6b2;--accent:#66c0f4;--white:#dbe9f4}
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071018 0%, #071b26 100%); color:var(--white); margin:0; padding:24px}
+    .wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1200px;margin:0 auto}
+    .panel{background:var(--panel);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(2,6,10,.6)}
+    textarea{width:100%;height:420px;background:#071116;border:1px solid rgba(255,255,255,.04);color:var(--white);padding:12px;border-radius:8px;font-family:monospace;font-size:14px}
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+    button{background:transparent;border:1px solid rgba(255,255,255,.06);padding:8px 10px;border-radius:8px;color:var(--white);cursor:pointer}
+    .muted{color:var(--muted);font-size:13px}
+    .preview{height:420px;overflow:auto;padding:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:8px}
+    .bbcode{height:160px;overflow:auto;padding:12px;background:#051018;border-radius:8px;font-family:monospace;font-size:13px}
+    .preview h1{font-size:20px;margin:6px 0}
+    .preview h2{font-size:18px;margin:6px 0}
+    .preview h3{font-size:16px;margin:6px 0}
+    .preview p{line-height:1.5;color:var(--white)}
+    .preview a{color:var(--accent);text-decoration:none}
+    .preview pre.code{background:#0b1220;padding:10px;border-radius:6px;overflow:auto}
+    .spoiler{background:#0f1420;color:transparent;border-radius:6px;padding:4px 6px;display:inline-block}
+    .spoiler.revealed{color:var(--white);background:#13202a}
+    .controls .flex{margin-left:auto}
+    .btn-copy{font-weight:600}
+    footer{max-width:1200px;margin:18px auto 0;color:var(--muted);font-size:13px}
+    @media(max-width:900px){.wrap{grid-template-columns:1fr;}.panel{padding:12px}}
+  </style>
+</head>
+<body>
+  <h2 style="margin:0 0 14px 0">Steam Workshop Description Previewer 9000</h2>
+  <div class="wrap">
+    <div class="panel">
+      <div class="controls">
+        <div class="muted">Paste Markdown (or Steam-style text) below</div>
+        <div class="flex">
+          <button id="toBB">Convert → Steam BBCode</button>
+          <button id="copyBB" class="btn-copy">Copy BBCode</button>
+        </div>
+      </div>
+      <textarea id="input" placeholder="Paste markdown here...\n\nExamples: **bold**, *italic*, ## Heading, [link](https://example.com), ![alt](https://...)"></textarea>
+      <div style="margin-top:10px">
+        <div class="muted">Generated Steam BBCode (editable)</div>
+        <div class="bbcode" id="bbcode" contenteditable="true" spellcheck="false"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="controls">
+        <div class="muted">Live preview (approximate Steam rendering)</div>
+        <div class="flex">
+          <button id="copyHtml">Copy HTML</button>
+        </div>
+      </div>
+      <div class="preview" id="preview"></div>
+    </div>
+  </div>
+
+  <footer>
+    This tool converts common Markdown patterns into Steam-style BBCode and shows an approximate rendering. Not all Steam-only tags or parameters are supported. You can edit the BBCode panel before copying.
+  </footer>
+
+  <script>
+    // Basic Markdown -> Steam BBCode converter (heuristic)
+    function mdToSteamBB(md){
+      if(!md) return '';
+      // Normalize line endings
+      md = md.replace(/\r\n?/g,'\n');
+
+      // Code fences ```lang\n...\n```
+      md = md.replace(/```(?:\w+)?\n([\s\S]*?)```/g, function(_, code){ return '[code]'+code.replace(/\n$/,'')+'[/code]'; });
+
+      // Images: ![alt](url)
+      md = md.replace(/!\[[^\]]*\]\(([^)]+)\)/g, function(_, url){ return '[img]'+url+'[/img]'; });
+
+      // Links: [text](url)
+      md = md.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, text, url){ return '[url='+url+']'+text+'[/url]'; });
+
+      // Headings
+      md = md.replace(/^######\s*(.*)$/gm, '[h3]$1[/h3]');
+      md = md.replace(/^#####\s*(.*)$/gm, '[h3]$1[/h3]');
+      md = md.replace(/^####\s*(.*)$/gm, '[h3]$1[/h3]');
+      md = md.replace(/^###\s*(.*)$/gm, '[h2]$1[/h2]');
+      md = md.replace(/^##\s*(.*)$/gm, '[h2]$1[/h2]');
+      md = md.replace(/^#\s*(.*)$/gm, '[h1]$1[/h1]');
+
+      // Bold first
+      // protect literal [*] bullets from being treated as Markdown italics
+      md = md.replace(/\[\*\]/g, '%%BULLET%%');
+      md = md.replace(/\*\*(.*?)\*\*/g, '[b]$1[/b]');
+      md = md.replace(/__(.*?)__/g, '[b]$1[/b]');
+      // Strikethrough
+      md = md.replace(/~~(.*?)~~/g, '[strike]$1[/strike]');
+      // Italic (avoid touching already bolded). Don't allow italics to span newlines.
+      md = md.replace(/(?<!\[b\])\*(?!\*)([^*\n]+?)\*(?!\[\/b\])/g, '[i]$1[/i]');
+      md = md.replace(/(?<!\[b\])_(?!_)([^_\n]+?)_(?!\[\/b\])/g, '[i]$1[/i]');
+      // restore protected bullets
+      md = md.replace(/%%BULLET%%/g, '[*]');
+
+      // Inline code `code` -> wrap as [code]code[/code]
+      md = md.replace(/`([^`]+)`/g, '[code]$1[/code]');
+
+      // Blockquotes: lines starting with >
+      md = md.split('\n');
+      let out = [];
+      let inList = false;
+      let listItems = [];
+      let inBlockquote = false;
+      let blockquoteLines = [];
+      for(let i=0;i<md.length;i++){
+        let line = md[i];
+        // unordered list item (markdown - + or *)
+        if(/^\s*([*+-])\s+/.test(line)){
+          let item = line.replace(/^\s*([*+-])\s+/,'' );
+          listItems.push(item);
+          inList = true;
+          continue;
+        } else {
+          if(inList){
+            // flush list
+            out.push('[list]');
+            listItems.forEach(it=>out.push('[*]'+it));
+            out.push('[/list]');
+            listItems = [];
+            inList = false;
+          }
+        }
+        // numbered lists (1. )
+        if(/^\s*\d+\.\s+/.test(line)){
+          let item = line.replace(/^\s*\d+\.\s+/,'' );
+          listItems.push(item);
+          inList = true;
+          continue;
+        }
+        // blockquote
+        if(/^>\s?/.test(line)){
+          blockquoteLines.push(line.replace(/^>\s?/,'') );
+          inBlockquote = true;
+          continue;
+        } else {
+          if(inBlockquote){
+            out.push('[quote]'+blockquoteLines.join('\n')+'[/quote]');
+            blockquoteLines = [];
+            inBlockquote = false;
+          }
+        }
+        out.push(line);
+      }
+      if(inList){
+        out.push('[list]');
+        listItems.forEach(it=>out.push('[*]'+it));
+        out.push('[/list]');
+      }
+      if(inBlockquote){
+        out.push('[quote]'+blockquoteLines.join('\n')+'[/quote]');
+      }
+
+      let txt = out.join('\n');
+
+      // Horizontal rule ---  (treat both [hr] and [/hr] the same later)
+      txt = txt.replace(/^---$/gm, '[hr]');
+
+      // Paragraphs: remove multiple blank lines
+      txt = txt.replace(/\n{3,}/g,'\n\n');
+      return txt;
+    }
+
+    // Simple BBCode -> HTML renderer (approximate Steam look)
+    function bbToHtml(bb){
+      if(!bb) return '';
+      let html = bb.slice();
+      // Escape HTML special chars already in text (but not inside tags). For simplicity, only escape raw < >
+      html = html.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+      // Now restore known bbcode tags by replacing their escaped forms
+      const rules = [
+        {r:/\[b\]([\s\S]*?)\[\/b\]/gi, repl:'<strong>$1</strong>'},
+        {r:/\[i\]([\s\S]*?)\[\/i\]/gi, repl:'<em>$1</em>'},
+        {r:/\[u\]([\s\S]*?)\[\/u\]/gi, repl:'<u>$1</u>'},
+        {r:/\[strike\]([\s\S]*?)\[\/strike\]/gi, repl:'<s>$1</s>'},
+        {r:/\[h1\]([\s\S]*?)\[\/h1\]/gi, repl:'<h1>$1</h1>'},
+        {r:/\[h2\]([\s\S]*?)\[\/h2\]/gi, repl:'<h2>$1</h2>'},
+        {r:/\[h3\]([\s\S]*?)\[\/h3\]/gi, repl:'<h3>$1</h3>'},
+        {r:/\[code\]([\s\S]*?)\[\/code\]/gi, repl:function(m,p1){ return '<pre class="code">'+escapeHtml(p1)+'</pre>'; }},
+        {r:/\[url=([^\]]+)\]([\s\S]*?)\[\/url\]/gi, repl:'<a href="$1" target="_blank" rel="noopener">$2</a>'},
+        {r:/\[img\]([^\[]+)\[\/img\]/gi, repl:'<div><img src="$1" alt="image" style="max-width:100%;border-radius:6px;border:1px solid rgba(255,255,255,0.03)"/></div>'},
+        // treat both [hr] and [/hr] as an <hr/>
+        {r:/\[\/?hr\]/gi, repl:'<hr/>'},
+        {r:/\[quote\]([\s\S]*?)\[\/quote\]/gi, repl:'<blockquote>$1</blockquote>'},
+        {r:/\[spoiler\]([\s\S]*?)\[\/spoiler\]/gi, repl:function(m,p1){ return '<span class="spoiler" onclick="this.classList.toggle(\'revealed\')">'+p1+'</span>'; }},
+      ];
+      rules.forEach(rule=>{ html = html.replace(rule.r, rule.repl); });
+
+      // Lists: [list]\n[*]item\n[*]item\n[/list]
+      html = html.replace(/\[list\]([\s\S]*?)\[\/list\]/gi, function(_,content){
+        // split on literal [*] and keep content safe trimmed
+        let items = content.split(/\[\*\]/).map(s=>s.trim()).filter(Boolean);
+        // escape inner HTML for safety (but we already processed a number of bbcode tags above)
+        return '<ul>'+items.map(it=>' <li>'+it+'</li>').join('')+'</ul>';
+      });
+      // Any remaining standalone [*] -> turn into bullet symbol
+      html = html.replace(/\[\*\]/g, '• ');
+
+      // Remaining newlines -> paragraphs / line breaks
+      // double newlines -> paragraph separators, single newline -> <br/>
+      html = html.replace(/\n{2,}/g,'</p><p>');
+      html = html.replace(/\n/g,'<br/>');
+      html = '<p>'+html+'</p>';
+      // simple cleanup for empty paragraphs
+      html = html.replace(/<p><\/p>/g,'');
+      return html;
+    }
+
+    function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    const input = document.getElementById('input');
+    const bbcode = document.getElementById('bbcode');
+    const preview = document.getElementById('preview');
+    const toBB = document.getElementById('toBB');
+    const copyBB = document.getElementById('copyBB');
+    const copyHtml = document.getElementById('copyHtml');
+
+    function renderAll(){
+      const md = input.value;
+      const bb = mdToSteamBB(md);
+      bbcode.textContent = bb;
+      // also render the bbcode -> html approximation
+      preview.innerHTML = bbToHtml(bb);
+      // Make spoilers clickable inside preview
+      preview.querySelectorAll('.spoiler').forEach(el=>{ el.addEventListener('click', ()=>el.classList.toggle('revealed')) });
+    }
+
+    input.addEventListener('input', renderAll);
+    toBB.addEventListener('click', ()=>{
+      const bb = mdToSteamBB(input.value);
+      bbcode.textContent = bb;
+      preview.innerHTML = bbToHtml(bb);
+    });
+
+    bbcode.addEventListener('input', ()=>{ // when user edits bbcode panel directly
+      preview.innerHTML = bbToHtml(bbcode.textContent);
+    });
+
+    copyBB.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(bbcode.textContent).then(()=>{
+        copyBB.textContent = 'Copied!'; setTimeout(()=>copyBB.textContent='Copy BBCode',900);
+      }).catch(()=>{ copyBB.textContent='Failed'; setTimeout(()=>copyBB.textContent='Copy BBCode',900); });
+    });
+    copyHtml.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(preview.innerHTML).then(()=>{
+        copyHtml.textContent='Copied!'; setTimeout(()=>copyHtml.textContent='Copy HTML',900);
+      }).catch(()=>{ copyHtml.textContent='Failed'; setTimeout(()=>copyHtml.textContent='Copy HTML',900); });
+    });
+
+    // initial demo content
+    input.value = '# Example Guide\n\nThis is **bold** text, and this is *italic*. A link: [Rick Roll](https://www.youtube.com/watch?v=dQw4w9WgXcQ).\n\n- First item\n- Second item\n\n> Blockquote here.\n\n```\nconsole.log("Hello");\n```\n';
+    renderAll();
+  </script>
+</body>
+</html>
