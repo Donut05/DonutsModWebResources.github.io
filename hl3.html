@@ -29,6 +29,15 @@
             overflow: hidden
         }
 
+        .page-obj {
+            position: absolute;
+            left: 50%;
+            top: 35%;
+            transform: translate(-50%, -50%);
+            z-index: 11;
+            pointer-events: none
+        }
+
         .timer-wrap {
             position: absolute;
             left: 50%;
@@ -159,6 +168,10 @@
                 <feBlend mode="overlay" in2="SourceGraphic" />
             </filter>
         </svg>
+
+        <div class="page-obj" id="textGIF">
+            <img src="website/gifs/hl3_nov_18.gif" class="page-obj" />
+        </div>
 
         <div class="timer-wrap" id="timerWrap">
             <div class="timer" id="timer">00:00:00:00</div>
