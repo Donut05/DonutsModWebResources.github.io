@@ -2,9 +2,7 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>HALF-LIFE 3/HLX TOMORROW!</title>
+    <title>HALF-LIFE NOW!</title>
     <style>
         html,
         body {
@@ -22,100 +20,27 @@
             font-display: swap;
         }
 
-        .stage {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden
+        .element {
+            width: 33%;
+            height: 95%;
         }
 
-        .page-obj {
+        .elementMirrored {
+            width: 33%;
+            height: 95%;
+            transform: scale(-1, 1);
+        }
+
+        .text {
+            color: #ffffff;
             position: absolute;
-            left: 50%;
-            top: 35%;
-            transform: translate(-50%, -50%);
-            z-index: 11;
-            pointer-events: none
-        }
-
-        .timer-wrap {
-            position: absolute;
-            left: 50%;
-            top: 45%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-            pointer-events: none
-        }
-
-        .timer {
-            font-size: clamp(36px, 8vw, 120px);
-            letter-spacing: 0.02em;
-            font: "HL2";
-            color: #f26622;
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            padding: 10px 20px; 
+            font-size: 500%;
             text-align: center;
-            padding: 0 20px
-        }
-
-        .reflection-wrap {
-            position: absolute;
-            left: 50%;
-            top: 55%;
-            transform: translate(-50%, 0);
-            width: 100%;
-            text-align: center;
-            pointer-events: none
-        }
-
-        .reflection {
-            display: inline-block;
-            transform: scaleY(-1);
-            opacity: 0.35;
-            filter: blur(1px) contrast(0.95) saturate(0.6);
-            mix-blend-mode: screen
-        }
-
-        .reflection::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            pointer-events: none
-        }
-
-        .dither-overlay {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-            opacity: 0.18
-        }
-
-        .particle {
-            position: absolute;
-            will-change: transform, opacity;
-            pointer-events: none;
-            opacity: 0
-        }
-
-        @keyframes floatUp {
-            0% {
-                opacity: 0;
-                transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(var(--s, 1)) rotate(var(--r, 0deg))
-            }
-
-            10% {
-                opacity: 1
-            }
-
-            100% {
-                opacity: 0;
-                transform: translate(calc(var(--sx, 0px) + var(--dx, 0px)), calc(var(--sy, 0px) - var(--dy, 200px))) scale(calc(var(--s, 1) * 1.05)) rotate(calc(var(--r, 0deg) + 20deg))
-            }
+            user-select: none
         }
 
         .start-overlay {
@@ -129,274 +54,53 @@
             cursor: pointer
         }
 
-        .start-void {
-            color: #fff;
+        .startText {
+            color: #ffffff;
+            font: "HL2";
             font-size: clamp(18px, 3.5vw, 48px);
             text-align: center;
             opacity: 0.98;
             letter-spacing: 0.04em;
             user-select: none
         }
-
-        .start-void.small {
-            font-size: clamp(12px, 2vw, 18px);
-            opacity: 0.7
-        }
-
-        .hint {
-            position: absolute;
-            left: 1rem;
-            bottom: 1rem;
-            color: #bbb;
-            font-size: 12px;
-            z-index: 60
-        }
     </style>
 </head>
 
 <body>
-    <div class="stage" id="stage">
-        <svg width="0" height="0" style="position:absolute">
-            <filter id="noiseFilter">
-                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"
-                    result="turb" />
-                <feColorMatrix type="saturate" values="0" in="turb" result="mono" />
-                <feComponentTransfer in="mono" result="contrast">
-                    <feFuncA type="table" tableValues="0 0 1 1" />
-                    <feFuncR type="linear" slope="2" />
-                </feComponentTransfer>
-                <feBlend mode="overlay" in2="SourceGraphic" />
-            </filter>
-        </svg>
-
-        <div class="timer-wrap" id="timerWrap">
-            <div class="timer" id="timer">00:00:00:00</div>
-        </div>
-
-        <div class="reflection-wrap">
-            <div class="reflection" id="timerReflection">
-                <div class="timer" id="timerRefContent">00:00:00:00</div>
-            </div>
-        </div>
-
-        <div class="dither-overlay" style="filter:url(#noiseFilter);pointer-events:none"></div>
-
-        <div id="particles" style="position:absolute;inset:0;z-index:5;pointer-events:none"></div>
-
-        <input id="bgPicker" type="file" accept="audio/*" style="display:none" />
-
-        <div id="startOverlay" class="start-overlay" role="button" aria-label="Start animations and enable audio">
-            <div class="start-void" id="startText">🔘</div>
-        </div>
-
+    <div>
+      <audio id="vineBoom" src="website/audio/vine-boom.mp3" preload="auto" hidden="true"></audio>
     </div>
+    <div>
+      <audio id="alarm" src="website/audio/alarm.mp3" loop="true" preload="auto" hidden="true"></audio>
+    </div>
+    <img class="element" src="https://web.archive.org/web/20070824183151if_/http://www.geocities.com/aikidopaz/new3.gif" />
+    <img class="element" src="website/images/hl3/logo.png" />
+    <img class="elementMirrored" src="https://web.archive.org/web/20070824183151if_/http://www.geocities.com/aikidopaz/new3.gif" />
+    <div class="text" id="text">HALF-LIFE 3 NOW!!!</div>
 
-    <script>
-        /* ====================================================================== */
-        const TARGET_ISO = "2025-11-18T17:00:00.000Z"; //ISO format
-        const IMAGES = [
-            'website/images/hl3/dust.png',
-            'website/images/hl3/dust.png',
-            'website/images/hl3/lens_flare.png',
-            'website/images/hl3/lens_flare.png',
-            'website/images/hl3/graph.png',
-            'website/images/hl3/logo.png'
-        ];
-
-        const MINUTE_SOUND_URL = 'website/audio/hl3/timer.wav';
-
-        const LOOP_SOUND_URL = 'website/audio/hl3/amb_bg_lp.wav';
-
-        const INTRO_SOUND_URL = 'website/audio/hl3/intro.wav';
-
-        const RANDOM_SOUNDS = [
-            'website/audio/hl3/amb_swell_01.wav',
-            'website/audio/hl3/amb_swell_02.wav',
-            'website/audio/hl3/amb_swell_03.wav',
-            'website/audio/hl3/amb_swell_04.wav'
-        ];
-        /* ====================================================================== */
-
-        const timerEl = document.getElementById('timer');
-        const timerRefContent = document.getElementById('timerRefContent');
-        const particles = document.getElementById('particles');
-        const startOverlay = document.getElementById('startOverlay');
-        const startText = document.getElementById('startText');
-        const bgPicker = document.getElementById('bgPicker');
-
-        const targetTime = new Date(TARGET_ISO).getTime();
-
-        const minuteAudio = new Audio(MINUTE_SOUND_URL);
-        minuteAudio.preload = 'auto';
-        const loopAudio = new Audio(LOOP_SOUND_URL);
-        loopAudio.loop = true;
-        loopAudio.preload = 'auto';
-        const introAudio = new Audio(INTRO_SOUND_URL);
-        loopAudio.preload = 'auto';
-
-        const randomAudios = RANDOM_SOUNDS.map(url => { const a = new Audio(url); a.preload = 'auto'; return a; });
-
-        let lastMinutesRemaining = null;
-        let started = false;
-
-        function formatTime(ms) {
-            if (ms <= 0) return '2025';
-            const totalSeconds = Math.floor(ms / 1000);
-            const days = Math.floor(totalSeconds / (3600 * 24));
-            const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            const dd = String(days).padStart(2, '0');
-            const hh = String(hours).padStart(2, '0');
-            const mm = String(minutes).padStart(2, '0');
-            const ss = String(seconds).padStart(2, '0');
-            return `${dd}:${hh}:${mm}:${ss}`;
-        }
-
-        function update() {
-            const now = Date.now();
-            const diff = targetTime - now;
-            timerEl.textContent = formatTime(diff);
-            timerRefContent.textContent = timerEl.textContent;
-
-            const minutesRemaining = Math.floor(Math.max(0, diff) / 60000);
-            if (started && lastMinutesRemaining !== null && minutesRemaining !== lastMinutesRemaining) {
-                try { minuteAudio.currentTime = 0; minuteAudio.play().catch(() => { }); } catch (e) { }
-            }
-            lastMinutesRemaining = minutesRemaining;
-
-            requestAnimationFrame(update);
-        }
-
-        function startRandomSounds() {
-            setInterval(() => {
-                if (!started) return;
-                if (Math.random() < 0.35) {
-                    const idx = Math.floor(Math.random() * randomAudios.length);
-                    const a = randomAudios[idx];
-                    try { a.currentTime = 0; a.play().catch(() => { }); } catch (e) { }
-                }
-            }, 5000 + Math.random() * 7000);
-        }
-
-        function spawnParticle() {
-            if (IMAGES.length === 0) return;
-            const imgUrl = IMAGES[Math.floor(Math.random() * IMAGES.length)];
-            const el = document.createElement('img');
-            el.src = imgUrl;
-            el.className = 'particle';
-
-            const s = (0.04 + Math.random() * 0.12) * Math.max(window.innerWidth, window.innerHeight);
-            el.style.width = Math.min(s, 100) + 'px';
-            el.style.height = 'auto';
-            el.style.opacity = 0;
-
-            const safeRect = getTimerAvoidRect(300, 200);
-            let x, y;
-            let attempts = 0;
-            do {
-                x = Math.random() * (window.innerWidth - s);
-                y = Math.random() * (window.innerHeight - s);
-                attempts++;
-            } while (pointInRect(x + s / 2, y + s / 2, safeRect) && attempts < 10);
-
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
-
-            const dx = (20 + Math.random() * 120) * (Math.random() < 0.5 ? -1 : 1);
-            const dy = 60 + Math.random() * 260;
-            const r = (Math.random() * 40 - 20) + 'deg';
-            el.style.setProperty('--dx', dx + 'px');
-            el.style.setProperty('--dy', dy + 'px');
-            el.style.setProperty('--s', (0.6 + Math.random() * 1.4));
-            el.style.setProperty('--r', r);
-            el.style.setProperty('--sx', '0px');
-            el.style.setProperty('--sy', '0px');
-
-            const duration = 4500 + Math.random() * 7000;
-            el.style.animation = `floatUp ${duration}ms linear forwards`;
-
-            particles.appendChild(el);
-
-            setTimeout(() => { if (el && el.parentNode) el.parentNode.removeChild(el); }, duration + 50);
-        }
-
-        function getTimerAvoidRect(w = 300, h = 200) {
-            const rect = document.getElementById('timerWrap').getBoundingClientRect();
-            return { x: rect.left - w / 2, y: rect.top - h / 2, w: rect.width + w, h: rect.height + h };
-        }
-
-        function pointInRect(px, py, rect) {
-            return px >= rect.x && px <= (rect.x + rect.w) && py >= rect.y && py <= (rect.y + rect.h);
-        }
-
-        function startParticles() {
-            setInterval(() => {
-                const count = Math.random() < 0.6 ? 1 : (Math.random() < 0.5 ? 2 : 3);
-                for (let i = 0; i < count; i++) {
-                    setTimeout(spawnParticle, Math.random() * 800);
-                }
-            }, 800 + Math.random() * 1600);
-        }
-
-        bgPicker.addEventListener('change', () => {
-            const f = bgPicker.files[0];
-            if (!f) return;
-            try {
-                loopAudio.src = URL.createObjectURL(f);
-                loopAudio.loop = true;
-                loopAudio.play().catch(() => { });
-            } catch (e) {
-                console.error('Failed to play selected file', e);
-            }
-        });
-
-        function unlockAndStart() {
-            if (started) return;
-            started = true;
-
-            loopAudio.volume = 0.6;
-            minuteAudio.volume = 0.95;
-
-            introAudio.play()
-
-            loopAudio.play().then(() => {
-                console.log('Loop audio playing from:', loopAudio.src);
-            }).catch((err) => {
-                console.warn('Loop audio failed to play:', err);
-            });
-
-            loopAudio.addEventListener('error', () => {
-                console.warn('Loop audio error event fired for src:', loopAudio.src);
-            }, { once: true });
-
-            lastMinutesRemaining = Math.floor(Math.max(0, targetTime - Date.now()) / 60000);
-            update();
-            startRandomSounds();
-            startParticles();
-
-            if (startOverlay && startOverlay.parentNode) startOverlay.parentNode.removeChild(startOverlay);
-        }
-
-        startOverlay.addEventListener('click', () => { unlockAndStart(); });
-        startOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); unlockAndStart(); }, { passive: false });
-        window.addEventListener('keydown', (e) => { if (!started) { unlockAndStart(); } });
-
-        timerEl.textContent = formatTime(Math.max(0, targetTime - Date.now()));
-        timerRefContent.textContent = timerEl.textContent;
-
-        function syncReflectionSize() {
-            const wrap = document.getElementById('timerWrap');
-            const ref = document.getElementById('timerReflection');
-            if (!wrap || !ref) return;
-            const style = window.getComputedStyle(timerEl);
-            timerRefContent.style.fontSize = style.fontSize;
-            timerRefContent.style.letterSpacing = style.letterSpacing;
-        }
-        window.addEventListener('resize', syncReflectionSize);
-        syncReflectionSize();
-
-    </script>
+    <div id="startOverlay" class="start-overlay" role="button">
+        <div class="startText" id="startText">HALF-LIFE WHEN?</div>
+    </div>
 </body>
+<script>
+    let started = false;
+    let color = false;
+    let timer = 100;
+
+    function unlockAndStart() {
+        if (started) return;
+        started = true;
+
+        document.getElementById('vineBoom').play();
+        document.getElementById('alarm').play();
+
+        let overlay = document.getElementById("startOverlay");
+        overlay.remove();
+    }
+
+    document.getElementById('startOverlay').addEventListener('click', () => { unlockAndStart(); });
+    document.getElementById('startOverlay').addEventListener('touchstart', (e) => { e.preventDefault(); unlockAndStart(); }, { passive: false });
+    window.addEventListener('keydown', (e) => { if (!started) { unlockAndStart(); } });
+</script>
 
 </html>
