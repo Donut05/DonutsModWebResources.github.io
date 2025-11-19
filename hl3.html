@@ -169,10 +169,6 @@
             </filter>
         </svg>
 
-        <div class="page-obj" id="textGIF">
-            <img src="website/gifs/hl3_nov_18.gif" class="page-obj" />
-        </div>
-
         <div class="timer-wrap" id="timerWrap">
             <div class="timer" id="timer">00:00:00:00</div>
         </div>
@@ -244,7 +240,7 @@
         let started = false;
 
         function formatTime(ms) {
-            if (ms <= 0) return '00:00:00:00';
+            if (ms <= 0) return '2025';
             const totalSeconds = Math.floor(ms / 1000);
             const days = Math.floor(totalSeconds / (3600 * 24));
             const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
